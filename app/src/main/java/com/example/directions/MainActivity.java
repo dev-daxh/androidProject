@@ -20,6 +20,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
+
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -62,14 +67,32 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                             mMap.addMarker(new MarkerOptions().position(currentLocation).title("Your Location"));
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
 
-                            // Optionally, use the location to find directions or further actions
-                            Toast.makeText(MainActivity.this, "Location: " + currentLocation.toString(), Toast.LENGTH_LONG).show();
+                            // Prepare the coordinates in a string format
+                            String coordinates = "Latitude: " + location.getLatitude() + "\nLongitude: " + location.getLongitude();
+
+                            // Show the coordinates in a dialog box
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setTitle("Your Coordinates")
+                                    .setMessage(coordinates)
+                                    .setPositiveButton("Copy to Clipboard", (dialog, which) -> {
+                                        // Copy the coordinates to clipboard
+                                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                        ClipData clip = ClipData.newPlainText("Coordinates", coordinates);
+                                        clipboard.setPrimaryClip(clip);
+
+                                        // Show toast notification that coordinates are copied
+                                        Toast.makeText(MainActivity.this, "Coordinates copied to clipboard", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                                    .show();
+
                         } else {
                             Toast.makeText(MainActivity.this, "Location not found", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
